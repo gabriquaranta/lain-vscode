@@ -153,7 +153,7 @@ export class GifService {
       const index = Math.floor(Math.random() * this._foundBaseGifs.length);
       gifName = this._foundBaseGifs[index] || this._baseGifs[0];
       isSpecial = false;
-    } else if (this._baseCycledCount >= 10 && this._otherGifs.length > 0) {
+    } else if (this._baseCycledCount >= 5 && this._otherGifs.length > 0) {
       const index = Math.floor(Math.random() * this._otherGifs.length);
       gifName = this._otherGifs[index];
       isSpecial = true;

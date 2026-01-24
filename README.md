@@ -1,5 +1,7 @@
 # Lain VS Code Extension
 
+![Lain](assets/readme/sc.gif)
+
 A VS Code extension that showcases Lain GIFs in the IDE, providing a companion-like experience similar to VS Code pets.
 
 ## Features
@@ -13,18 +15,21 @@ A VS Code extension that showcases Lain GIFs in the IDE, providing a companion-l
 To install the extension locally for development or personal use, follow these steps:
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/gabriquaranta/lain-vscode.git
    cd lain-vscode
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Package the extension**:
    Use the VS Code Extension Manager to package the extension into a `.vsix` file:
+
    ```bash
    npx @vscode/vsce package
    ```
