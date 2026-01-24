@@ -146,13 +146,24 @@ export class GifService {
     let isSpecial = false;
 
     const rand = Math.random();
-    // If last was special, we MUST pick a base gif.
-    // If we've played 5 base gifs in a row, we MUST pick a special gif (if available).
-    // Otherwise, 80% chance of base, 20% chance of special (if available).
-    if (this._lastWasSpecial || this._foundBaseGifs.length === 0) {
+    // Rules:
+    // - If the last shown gif was special, prefer a base gif (but only if base gifs exist).
+    // - If we've played 5 base gifs in a row, force a special gif (if available).
+    // - Otherwise, 80% chance base / 20% chance special (if available).
+    if (this._lastWasSpecial && this._foundBaseGifs.length > 0) {
       const index = Math.floor(Math.random() * this._foundBaseGifs.length);
       gifName = this._foundBaseGifs[index] || this._baseGifs[0];
       isSpecial = false;
+    } else if (this._foundBaseGifs.length === 0) {
+      // No base gifs available: pick a special/other gif if possible, else fallback to default base name
+      if (this._otherGifs.length > 0) {
+        const index = Math.floor(Math.random() * this._otherGifs.length);
+        gifName = this._otherGifs[index];
+        isSpecial = true;
+      } else {
+        gifName = this._baseGifs[0];
+        isSpecial = false;
+      }
     } else if (this._baseCycledCount >= 5 && this._otherGifs.length > 0) {
       const index = Math.floor(Math.random() * this._otherGifs.length);
       gifName = this._otherGifs[index];
