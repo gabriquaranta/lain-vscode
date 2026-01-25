@@ -15,9 +15,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onView:lain.view"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "views": {
@@ -25,6 +22,7 @@
         {
           "type": "webview",
           "id": "lain.view",
+          "icon": "assets/icon/lain.jpg",
           "name": "Lain"
         }
       ]
