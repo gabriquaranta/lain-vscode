@@ -1,8 +1,0 @@
-.vscode/**
-.vscode-test/**
-src/**
-.gitignore
-.eslintrc.json
-tsconfig.json
-package-lock.json
-npm-debug.log
