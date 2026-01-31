@@ -71,63 +71,93 @@ class LainViewProvider implements vscode.WebviewViewProvider {
 
   private _getHtmlForWebview() {
     return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<style>
-					body {
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						height: 100vh;
-						margin: 0;
-						overflow: hidden;
-						background-color: transparent;
-					}
-					img {
-						max-width: 100%;
-						max-height: 100%;
-						object-fit: contain;
-					}
-				</style>
-				<title>Lain</title>
-			</head>
-			<body>
-				<img id="lain-gif" src="" alt="Lain" />
-				<script>
-					const vscode = acquireVsCodeApi();
-					const img = document.getElementById('lain-gif');
-					let cycleTimeout;
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            :root {
+              -webkit-font-smoothing: antialiased;
+            }
+            body {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100%;
+              margin: 0;
+              background-color: transparent;
+            }
+            .gif-wrapper {
+              width: fit-content;
+              height: fit-content;
+              overflow: auto;
+              display: inline-block;
+            }
+            img {
+              display: block;
+              width: auto;
+              height: auto;
+              max-width: none;
+              max-height: none;
+              image-rendering: pixelated;
+              image-rendering: crisp-edges;
+              -ms-interpolation-mode: nearest-neighbor;
+              image-rendering: -moz-crisp-edges;
+              image-rendering: -o-pixelated;
+            }
+          </style>
+          <title>Lain</title>
+        </head>
+        <body>
+          <div class="gif-wrapper"><img id="lain-gif" src="" alt="Lain" /></div>
+          <script>
+            const vscode = acquireVsCodeApi();
+            const img = document.getElementById('lain-gif');
+            const wrapper = document.querySelector('.gif-wrapper');
+            let cycleTimeout;
 
-					function requestNextGif() {
-						if (cycleTimeout) {
-							clearTimeout(cycleTimeout);
-						}
-						vscode.postMessage({ type: 'ready' });
-					}
-					
-					window.addEventListener('message', event => {
-						const message = event.data;
-						switch (message.type) {
-							case 'updateGif':
-								img.src = message.uri;
-								
-								let nextDelay;
-								if (message.isSpecial && message.duration) {
-									nextDelay = message.duration;
-								} else {
-									nextDelay = Math.floor(Math.random() * 5000) + 5000;
-								}
-								
-								cycleTimeout = setTimeout(requestNextGif, nextDelay);
-								break;
-						}
-					});
+            function requestNextGif() {
+              if (cycleTimeout) {
+                clearTimeout(cycleTimeout);
+              }
+              vscode.postMessage({ type: 'ready' });
+            }
 
-					requestNextGif();
-				</script>
-			</body>
-			</html>`;
+            // Ensure the wrapper uses the GIF's intrinsic size and does not scale it.
+            img.addEventListener('load', () => {
+              try {
+                const w = img.naturalWidth || img.width;
+                const h = img.naturalHeight || img.height;
+                if (w && h) {
+                  wrapper.style.width = w + 'px';
+                  wrapper.style.height = h + 'px';
+                }
+              } catch (e) {
+                // ignore
+              }
+            });
+
+            window.addEventListener('message', event => {
+              const message = event.data;
+              switch (message.type) {
+                case 'updateGif':
+                  img.src = message.uri;
+
+                  let nextDelay;
+                  if (message.isSpecial && message.duration) {
+                    nextDelay = message.duration;
+                  } else {
+                    nextDelay = Math.floor(Math.random() * 5000) + 5000;
+                  }
+
+                  cycleTimeout = setTimeout(requestNextGif, nextDelay);
+                  break;
+              }
+            });
+
+            requestNextGif();
+          </script>
+        </body>
+        </html>`;
   }
 }
