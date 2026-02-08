@@ -46,6 +46,19 @@ class LainViewProvider implements vscode.WebviewViewProvider {
           this._updateGif();
           break;
         }
+        case "size": {
+          // Receive GIF dimensions from the webview. We can't programmatically
+          // resize the VS Code host panel/sidebar, but logging the size can be
+          // useful for diagnostics or future features.
+          try {
+            console.debug(
+              `Lain GIF size reported: ${data.width}x${data.height}`,
+            );
+          } catch (e) {
+            // ignore
+          }
+          break;
+        }
       }
     });
   }
@@ -131,6 +144,18 @@ class LainViewProvider implements vscode.WebviewViewProvider {
                 if (w && h) {
                   wrapper.style.width = w + 'px';
                   wrapper.style.height = h + 'px';
+
+                  // Also ensure the webview content enforces a minimum height so it
+                  // doesn't collapse smaller than the GIF. This won't change the
+                  // outer host container size (VS Code doesn't expose an API to
+                  // programmatically resize the sidebar/panel), but it keeps the
+                  // content consistent and prevents inner scrolling if possible.
+                  wrapper.style.minHeight = h + 'px';
+                  document.body.style.minHeight = h + 'px';
+
+                  // Let the extension host know the GIF size in case it wants to
+                  // react (e.g. telemetry or future UX flows).
+                  vscode.postMessage({ type: 'size', width: w, height: h });
                 }
               } catch (e) {
                 // ignore
