@@ -36,12 +36,19 @@ export class GifService {
         (gif) => !this._foundBaseGifs.includes(gif),
       );
 
-      // Pre-calculate durations
-      for (const gifName of this._allGifs) {
+      // Pre-calculate durations in parallel (concurrent parsing for faster startup)
+      const durationPromises = this._allGifs.map(async (gifName) => {
         const uri = vscode.Uri.joinPath(gifsUri, gifName);
-        const duration = await this._parseGifDuration(uri);
-        this._gifDurations.set(gifName, duration);
-      }
+        try {
+          const duration = await this._parseGifDuration(uri);
+          this._gifDurations.set(gifName, duration);
+        } catch (e) {
+          console.error(`Failed to parse duration for ${gifName}:`, e);
+          // Ensure there's always a sensible fallback
+          this._gifDurations.set(gifName, 3000);
+        }
+      });
+      await Promise.allSettled(durationPromises);
     } catch (error) {
       console.error("Failed to read GIFs directory:", error);
       this._allGifs = [];
@@ -135,6 +142,23 @@ export class GifService {
       console.error(`Error parsing GIF duration for ${uri.fsPath}:`, e);
       return FALLBACK_DURATION;
     }
+  }
+
+  public async ensureDuration(gifName: string): Promise<number> {
+    const existing = this._gifDurations.get(gifName);
+    if (typeof existing === "number") {
+      return existing;
+    }
+    // Parse on demand as a fallback and cache result
+    const uri = vscode.Uri.joinPath(
+      this._extensionUri,
+      "assets",
+      "gifs",
+      gifName,
+    );
+    const duration = await this._parseGifDuration(uri);
+    this._gifDurations.set(gifName, duration);
+    return duration;
   }
 
   public getNextGif(): GifInfo {

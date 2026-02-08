@@ -144,12 +144,11 @@ class LainViewProvider implements vscode.WebviewViewProvider {
                   img.src = message.uri;
 
                   let nextDelay;
-                  if (message.isSpecial && message.duration) {
+                  if (typeof message.duration === 'number' && !isNaN(message.duration)) {
                     nextDelay = message.duration;
                   } else {
                     nextDelay = Math.floor(Math.random() * 5000) + 5000;
                   }
-
                   cycleTimeout = setTimeout(requestNextGif, nextDelay);
                   break;
               }
